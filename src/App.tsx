@@ -16,9 +16,9 @@ interface Player {
 type KitKey = "overall" | "ltm" | "vanilla" | "sword" | "axe" | "nethpot" | "pot" | "uhc" | "smp" | "mace";
 type PageType = "home" | "rankings";
 
-// Upstash Redis bağlantı bilgileri
+// Upstash Redis bağlantı bilgileri (YENİ TOKEN)
 const UPSTASH_URL = "https://relieved-sailfish-134968.upstash.io";
-const UPSTASH_TOKEN = "gQAAAAAAA8A4AAIgcDEyYTEzOGNmZWmMzkOMjBhYTIZZTk3NmIyOGU0MGMLZAA";
+const UPSTASH_TOKEN = "gQAAAAAAAg84AAIgcDEyYTEzOGNmZWMzMzk0MjBhYTIzZTk3NmIyOGU0MGM1ZA";
 
 const KITS: Record<string, { ad: string; icon: JSX.Element; color: string }> = {
   ltm:     { 
@@ -375,7 +375,7 @@ export default function App() {
                             <th className="text-left px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider">Oyuncu</th>
                             <th className="text-center px-4 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider w-24">Bölge</th>
                             <th className="text-right px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider">Tierler</th>
-                          </tr>
+                          <tr>
                         </thead>
                         <tbody className="divide-y divide-white/[0.03]">
                           {kitPlayers.slice(0, 50).map((player, idx) => (
