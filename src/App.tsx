@@ -1,9 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Analytics } from '@vercel/analytics/react'
 
-// ===================================================
-// TİPLER
-// ===================================================
+// ===== TİPLER =====
 interface Player {
   id: string
   username: string
@@ -16,12 +14,9 @@ interface Player {
   tests: number
 }
 
-// ===================================================
-// SABİTLER
-// ===================================================
+// ===== SABİTLER =====
 const UPSTASH_URL = 'https://relieved-sailfish-134968.upstash.io'
 const UPSTASH_TOKEN = 'gQAAAAAAAg84AAIgcDEyYTEzOGNmZWMzMzk0MjBhYTIzZTk3NmIyOGU0MGM1ZA'
-
 const DISCORD_INVITE = 'https://discord.gg/Uk7AyW6uRs'
 
 const KIT_LIST = [
@@ -48,8 +43,8 @@ const TIER_COLORS: Record<string, string> = {
 
 const TIER_ORDER = ['HT1', 'HT2', 'HT3', 'HT4', 'HT5', 'LT1', 'LT2', 'LT3', 'LT4', 'LT5']
 
+// ===== YARDIMCI FONKSİYONLAR =====
 function getTierClass(tier: string): string {
-  // Tier adını normalize et: "Sword HT1" -> "HT1", "Crystal LT3" -> "LT3"
   const parts = tier.split(' ')
   const tierKey = parts[parts.length - 1].toUpperCase()
   return TIER_COLORS[tierKey] || 'tier-unranked'
@@ -66,9 +61,7 @@ function getTierPoints(tier: string): number {
   return TIER_PUAN[tierKey] || 0
 }
 
-// ===================================================
-// BALONCUK BİLEŞENİ
-// ===================================================
+// ===== BALONCUKLAR =====
 function Bubbles() {
   const bubbles = useMemo(() => {
     return Array.from({ length: 15 }, (_, i) => ({
@@ -101,10 +94,17 @@ function Bubbles() {
   )
 }
 
-// ===================================================
-// NAVİGASYON
-// ===================================================
-function Navbar({ activePage, setActivePage }: { activePage: string, setActivePage: (p: string) => void }) {
+// ===== DISCORD SVG İKONU =====
+function DiscordIcon({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+    </svg>
+  )
+}
+
+// ===== NAVİGASYON =====
+function Navbar({ activePage, setActivePage }: { activePage: string; setActivePage: (p: string) => void }) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -124,7 +124,6 @@ function Navbar({ activePage, setActivePage }: { activePage: string, setActivePa
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'nav-glass shadow-xl' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActivePage('home')}>
             <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-full border-2 border-ocean-500/30" />
             <div>
@@ -135,8 +134,7 @@ function Navbar({ activePage, setActivePage }: { activePage: string, setActivePa
             </div>
           </div>
 
-          {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-2 nav-links">
+          <div className="hidden md:flex items-center gap-2">
             {links.map(l => (
               <button
                 key={l.id}
@@ -147,16 +145,14 @@ function Navbar({ activePage, setActivePage }: { activePage: string, setActivePa
               </button>
             ))}
             <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="btn-discord text-sm !py-2 !px-4 ml-2">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+              <DiscordIcon size={18} />
               Discord
             </a>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
-            className="md:hidden flex flex-col gap-1.5 p-2 mobile-menu-btn"
+            className="md:hidden flex flex-col gap-1.5 p-2"
             onClick={() => setMobileOpen(!mobileOpen)}
-            style={{ display: 'flex' }}
           >
             <span className={`w-6 h-0.5 bg-slate-400 transition-all ${mobileOpen ? 'rotate-45 translate-y-2' : ''}`} />
             <span className={`w-6 h-0.5 bg-slate-400 transition-all ${mobileOpen ? 'opacity-0' : ''}`} />
@@ -164,7 +160,6 @@ function Navbar({ activePage, setActivePage }: { activePage: string, setActivePa
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {mobileOpen && (
           <div className="md:hidden pb-4 border-t border-slate-800 mt-2 pt-4 flex flex-col gap-2">
             {links.map(l => (
@@ -186,15 +181,12 @@ function Navbar({ activePage, setActivePage }: { activePage: string, setActivePa
   )
 }
 
-// ===================================================
-// FOOTER
-// ===================================================
+// ===== FOOTER =====
 function Footer() {
   return (
-    <footer className="footer-gradient border-t border-slate-800/50 mt-20">
+    <footer className="border-t border-slate-800/50 mt-20">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Marka */}
           <div>
             <div className="flex items-center gap-3 mb-4">
               <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-full" />
@@ -204,12 +196,11 @@ function Footer() {
               </div>
             </div>
             <p className="text-slate-400 text-sm leading-relaxed">
-              Türkiye'nin en büyük Minecraft PvP Tierlist topluluğu. 
+              Türkiye'nin en büyük Minecraft PvP Tierlist topluluğu.
               Seviyeni kanıtla, zirveye tırman!
             </p>
           </div>
 
-          {/* Bağlantılar */}
           <div>
             <h4 className="text-white font-semibold mb-4">Hızlı Bağlantılar</h4>
             <div className="flex flex-col gap-2">
@@ -221,7 +212,6 @@ function Footer() {
             </div>
           </div>
 
-          {/* Kitler */}
           <div>
             <h4 className="text-white font-semibold mb-4">Aktif Kitler</h4>
             <div className="flex flex-wrap gap-2">
@@ -239,7 +229,7 @@ function Footer() {
             © {new Date().getFullYear()} Abyssal Ocean PVP Tier. Tüm hakları saklıdır.
           </p>
           <p className="text-slate-600 text-xs mt-2">
-            Minecraft, Mojang Studios'un tescilli markasıdır. Bu site Mojang ile bağlantılı değildir.
+            Minecraft, Mojang Studios'un tescilli markasıdır.
           </p>
         </div>
       </div>
@@ -247,10 +237,8 @@ function Footer() {
   )
 }
 
-// ===================================================
-// ANA SAYFA
-// ===================================================
-function HomePage({ players, setActivePage }: { players: Player[], setActivePage: (p: string) => void }) {
+// ===== ANA SAYFA =====
+function HomePage({ players, setActivePage }: { players: Player[]; setActivePage: (p: string) => void }) {
   const topPlayers = players.slice(0, 3)
 
   const stats = useMemo(() => {
@@ -276,10 +264,9 @@ function HomePage({ players, setActivePage }: { players: Player[], setActivePage
 
   return (
     <div className="page-enter">
-      {/* HERO SECTION */}
+      {/* HERO */}
       <section className="relative min-h-[85vh] flex items-center justify-center px-4 pt-16">
         <div className="text-center max-w-4xl mx-auto">
-          {/* Logo */}
           <div className="mb-8 flex justify-center">
             <div className="relative">
               <div className="absolute inset-0 rounded-full bg-ocean-500/20 blur-3xl animate-pulse-slow" />
@@ -292,11 +279,7 @@ function HomePage({ players, setActivePage }: { players: Player[], setActivePage
             </div>
           </div>
 
-          {/* Başlık */}
-          <h1
-            className="hero-title text-4xl md:text-6xl lg:text-7xl font-black mb-4 tracking-tight"
-            style={{ animation: 'textGlow 3s ease-in-out infinite' }}
-          >
+          <h1 className="hero-title text-4xl md:text-6xl lg:text-7xl font-black mb-4 tracking-tight" style={{ animation: 'textGlow 3s ease-in-out infinite' }}>
             <span className="bg-gradient-to-r from-ocean-400 via-blue-400 to-cyan-300 bg-clip-text text-transparent">
               ABYSSAL OCEAN
             </span>
@@ -310,18 +293,15 @@ function HomePage({ players, setActivePage }: { players: Player[], setActivePage
             <span className="text-ocean-400">Seviyeni kanıtla, zirveye tırman!</span>
           </p>
 
-          {/* Butonlar */}
           <div className="flex flex-wrap gap-4 justify-center mb-12">
             <button onClick={() => setActivePage('leaderboard')} className="btn-ocean">
               🏆 Sıralamaya Bak
             </button>
             <a href={DISCORD_INVITE} target="_blank" rel="noopener noreferrer" className="btn-discord">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-              Discord'a Katıl
+              <DiscordIcon /> Discord'a Katıl
             </a>
           </div>
 
-          {/* İstatistikler */}
           <div className="stat-grid grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
             <div className="stat-card">
               <div className="text-3xl font-black text-ocean-400 mb-1">{stats.totalPlayers}</div>
@@ -343,14 +323,11 @@ function HomePage({ players, setActivePage }: { players: Player[], setActivePage
         </div>
       </section>
 
-      {/* TOP 3 OYUNCULAR */}
+      {/* TOP 3 */}
       {topPlayers.length > 0 && (
         <section className="max-w-5xl mx-auto px-4 py-16">
-          <h2 className="text-3xl font-bold text-center mb-2 text-white">
-            🏅 En İyi Oyuncular
-          </h2>
+          <h2 className="text-3xl font-bold text-center mb-2 text-white">🏅 En İyi Oyuncular</h2>
           <p className="text-center text-slate-400 mb-10">Tier puanlarına göre en yüksek sıralamalar</p>
-          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {topPlayers.map((player, idx) => {
               const medals = ['🥇', '🥈', '🥉']
@@ -388,7 +365,6 @@ function HomePage({ players, setActivePage }: { players: Player[], setActivePage
       <section className="max-w-5xl mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-2 text-white">⚔️ Aktif Kitler</h2>
         <p className="text-center text-slate-400 mb-10">Test olabileceğin tüm kitler</p>
-        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {KIT_LIST.filter(k => k.key !== 'all').map(k => (
             <div key={k.key} className="glass-card p-6 text-center cursor-pointer" onClick={() => setActivePage('leaderboard')}>
@@ -406,7 +382,6 @@ function HomePage({ players, setActivePage }: { players: Player[], setActivePage
       <section className="max-w-5xl mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-2 text-white">❓ Nasıl Çalışır?</h2>
         <p className="text-center text-slate-400 mb-10">3 adımda tier sahibi ol</p>
-        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             { step: '01', title: 'Discord\'a Katıl', desc: 'Sunucumuza katıl ve whitelist rolünü al', icon: '💬' },
@@ -426,27 +401,20 @@ function HomePage({ players, setActivePage }: { players: Player[], setActivePage
   )
 }
 
-// ===================================================
-// OYUNCU MODAL
-// ===================================================
-function PlayerModal({ player, onClose }: { player: Player, onClose: () => void }) {
+// ===== OYUNCU MODAL =====
+function PlayerModal({ player, onClose }: { player: Player; onClose: () => void }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        {/* Kapat butonu */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors text-xl"
-        >
+        <button onClick={onClose} className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors text-xl">
           ✕
         </button>
 
-        {/* Profil */}
         <div className="text-center mb-6">
           <img
             src={`https://mc-heads.net/avatar/${player.username}/80`}
             alt={player.username}
-            className="w-20 h-20 rounded-full mx-auto mb-3 border-3 border-ocean-500/30"
+            className="w-20 h-20 rounded-full mx-auto mb-3 border-2 border-ocean-500/30"
             onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${player.username}&background=0ea5e9&color=fff&size=80` }}
           />
           <h2 className="text-2xl font-bold text-white">{player.username}</h2>
@@ -469,7 +437,6 @@ function PlayerModal({ player, onClose }: { player: Player, onClose: () => void 
           </div>
         </div>
 
-        {/* Tier Detayları */}
         <div className="space-y-3">
           <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">Kit Tierleri</h3>
           {Object.entries(player.tiers).map(([kit, tier]) => {
@@ -491,7 +458,6 @@ function PlayerModal({ player, onClose }: { player: Player, onClose: () => void 
           })}
         </div>
 
-        {/* Alt bilgi */}
         <div className="mt-6 pt-4 border-t border-slate-700/50 text-center">
           <p className="text-xs text-slate-600">Discord ID: {player.discordId}</p>
         </div>
@@ -500,9 +466,7 @@ function PlayerModal({ player, onClose }: { player: Player, onClose: () => void 
   )
 }
 
-// ===================================================
-// SIRALAMA SAYFASI
-// ===================================================
+// ===== SIRALAMA SAYFASI =====
 function LeaderboardPage({ players }: { players: Player[] }) {
   const [activeKit, setActiveKit] = useState('all')
   const [search, setSearch] = useState('')
@@ -511,10 +475,8 @@ function LeaderboardPage({ players }: { players: Player[] }) {
   const filteredPlayers = useMemo(() => {
     let list = [...players]
 
-    // Kit filtresi
     if (activeKit !== 'all') {
       list = list.filter(p => p.tiers[activeKit])
-      // Kit bazında sıralama
       list.sort((a, b) => {
         const aPoints = getTierPoints(a.tiers[activeKit])
         const bPoints = getTierPoints(b.tiers[activeKit])
@@ -522,7 +484,6 @@ function LeaderboardPage({ players }: { players: Player[] }) {
       })
     }
 
-    // Arama
     if (search.trim()) {
       const s = search.toLowerCase()
       list = list.filter(p => p.username.toLowerCase().includes(s))
@@ -533,13 +494,11 @@ function LeaderboardPage({ players }: { players: Player[] }) {
 
   return (
     <div className="page-enter max-w-5xl mx-auto px-4 pt-24 pb-10">
-      {/* Başlık */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-black text-white mb-2">🏆 Sıralama Tablosu</h1>
         <p className="text-slate-400">Tüm oyuncuların tier puanlarına göre sıralaması</p>
       </div>
 
-      {/* Kit Filtreleri */}
       <div className="kit-tabs flex gap-2 mb-6 overflow-x-auto pb-2">
         {KIT_LIST.map(k => (
           <button
@@ -552,7 +511,6 @@ function LeaderboardPage({ players }: { players: Player[] }) {
         ))}
       </div>
 
-      {/* Arama */}
       <div className="relative mb-6">
         <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -566,12 +524,10 @@ function LeaderboardPage({ players }: { players: Player[] }) {
         />
       </div>
 
-      {/* Sonuç Sayısı */}
       <div className="text-sm text-slate-500 mb-4">
         {filteredPlayers.length} oyuncu bulundu
       </div>
 
-      {/* Oyuncu Listesi */}
       <div className="space-y-2">
         {filteredPlayers.length === 0 ? (
           <div className="text-center py-20 text-slate-500">
@@ -589,7 +545,6 @@ function LeaderboardPage({ players }: { players: Player[] }) {
                 className={`rank-card ${rankClass} flex items-center gap-4 cursor-pointer`}
                 onClick={() => setSelectedPlayer(player)}
               >
-                {/* Sıra */}
                 <div className="flex-shrink-0 w-10 text-center">
                   {rank === 1 ? <span className="text-2xl">🥇</span> :
                    rank === 2 ? <span className="text-2xl">🥈</span> :
@@ -597,7 +552,6 @@ function LeaderboardPage({ players }: { players: Player[] }) {
                    <span className="text-lg font-bold text-slate-500">#{rank}</span>}
                 </div>
 
-                {/* Avatar */}
                 <img
                   src={`https://mc-heads.net/avatar/${player.username}/40`}
                   alt={player.username}
@@ -605,13 +559,11 @@ function LeaderboardPage({ players }: { players: Player[] }) {
                   onError={(e) => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${player.username}&background=0ea5e9&color=fff&size=40` }}
                 />
 
-                {/* İsim */}
                 <div className="flex-grow min-w-0">
                   <div className="font-semibold text-white truncate">{player.username}</div>
                   <div className="text-xs text-slate-500">{Object.keys(player.tiers).length} kit</div>
                 </div>
 
-                {/* Tier Rozetleri */}
                 <div className="hidden sm:flex gap-1 flex-wrap justify-end max-w-[300px]">
                   {activeKit !== 'all' ? (
                     <span className={`tier-badge ${getTierClass(player.tiers[activeKit])}`}>
@@ -629,7 +581,6 @@ function LeaderboardPage({ players }: { players: Player[] }) {
                   )}
                 </div>
 
-                {/* Puan */}
                 <div className="flex-shrink-0 text-right ml-2">
                   <div className="text-lg font-bold text-ocean-400">
                     {activeKit !== 'all' ? getTierPoints(player.tiers[activeKit]) : player.totalPoints}
@@ -642,7 +593,6 @@ function LeaderboardPage({ players }: { players: Player[] }) {
         )}
       </div>
 
-      {/* Modal */}
       {selectedPlayer && (
         <PlayerModal player={selectedPlayer} onClose={() => setSelectedPlayer(null)} />
       )}
@@ -650,9 +600,7 @@ function LeaderboardPage({ players }: { players: Player[] }) {
   )
 }
 
-// ===================================================
-// TIER LİSTESİ SAYFASI
-// ===================================================
+// ===== TIER LİSTESİ SAYFASI =====
 function TierListPage({ players }: { players: Player[] }) {
   const [activeKit, setActiveKit] = useState('sword')
 
@@ -669,7 +617,6 @@ function TierListPage({ players }: { players: Player[] }) {
       }
     })
 
-    // Her grup içinde puana göre sırala
     Object.values(groups).forEach(arr => {
       arr.sort((a, b) => b.totalPoints - a.totalPoints)
     })
@@ -684,7 +631,6 @@ function TierListPage({ players }: { players: Player[] }) {
         <p className="text-slate-400">Kit bazında tüm tierlerin oyuncu dağılımı</p>
       </div>
 
-      {/* Kit Seçimi */}
       <div className="kit-tabs flex gap-2 mb-8 overflow-x-auto pb-2 justify-center">
         {KIT_LIST.filter(k => k.key !== 'all').map(k => (
           <button
@@ -697,7 +643,6 @@ function TierListPage({ players }: { players: Player[] }) {
         ))}
       </div>
 
-      {/* Tier Grupları */}
       <div className="space-y-6">
         {TIER_ORDER.map(tierKey => {
           const group = tierGroups[tierKey]
@@ -730,7 +675,6 @@ function TierListPage({ players }: { players: Player[] }) {
           )
         })}
 
-        {/* Hiç oyuncu yoksa */}
         {Object.values(tierGroups).every(g => g.length === 0) && (
           <div className="text-center py-20 text-slate-500">
             <div className="text-5xl mb-4">📭</div>
@@ -742,12 +686,10 @@ function TierListPage({ players }: { players: Player[] }) {
   )
 }
 
-// ===================================================
-// LOADING EKRANI
-// ===================================================
+// ===== LOADING =====
 function LoadingScreen() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-deep-950 z-50">
+    <div className="fixed inset-0 flex items-center justify-center z-50" style={{ background: '#040812' }}>
       <div className="text-center">
         <div className="loading-spinner mx-auto mb-4" />
         <p className="text-slate-400 text-sm animate-pulse">Veriler yükleniyor...</p>
@@ -756,15 +698,12 @@ function LoadingScreen() {
   )
 }
 
-// ===================================================
-// ANA APP
-// ===================================================
+// ===== ANA APP =====
 function App() {
   const [players, setPlayers] = useState<Player[]>([])
   const [loading, setLoading] = useState(true)
   const [activePage, setActivePage] = useState('home')
 
-  // Redis'ten veri çek
   const fetchPlayers = useCallback(async () => {
     try {
       const res = await fetch(`${UPSTASH_URL}/get/players`, {
@@ -773,7 +712,6 @@ function App() {
       const data = await res.json()
       if (data.result) {
         const parsed: Player[] = JSON.parse(data.result)
-        // Puanları yeniden hesapla ve sırala
         const sorted = parsed.map(p => {
           let total = 0
           for (const tier of Object.values(p.tiers)) {
@@ -782,18 +720,16 @@ function App() {
           return { ...p, totalPoints: total }
         }).sort((a, b) => b.totalPoints - a.totalPoints)
           .map((p, idx) => ({ ...p, rank: idx + 1 }))
-        
         setPlayers(sorted)
       }
     } catch (error) {
-      console.error('Veri çekme hatası:', error)
-      // Fallback: local JSON
+      console.error('Redis veri çekme hatası:', error)
       try {
         const res = await fetch('/web_oyuncular.json')
         const data = await res.json()
         setPlayers(data)
       } catch (e) {
-        console.error('Fallback da başarısız:', e)
+        console.error('Yedek dosya da okunamadı:', e)
       }
     } finally {
       setLoading(false)
@@ -802,10 +738,32 @@ function App() {
 
   useEffect(() => {
     fetchPlayers()
-    // Her 30 saniyede bir güncelle
     const interval = setInterval(fetchPlayers, 30000)
     return () => clearInterval(interval)
   }, [fetchPlayers])
 
-  // Sayfa değiştiğinde scroll'u sıfırla
-  
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [activePage])
+
+  if (loading) return <LoadingScreen />
+
+  return (
+    <>
+      <div className="ocean-bg" />
+      <Bubbles />
+      <Navbar activePage={activePage} setActivePage={setActivePage} />
+
+      <main className="relative z-10 min-h-screen">
+        {activePage === 'home' && <HomePage players={players} setActivePage={setActivePage} />}
+        {activePage === 'leaderboard' && <LeaderboardPage players={players} />}
+        {activePage === 'tiers' && <TierListPage players={players} />}
+      </main>
+
+      <Footer />
+      <Analytics />
+    </>
+  )
+}
+
+export default App
