@@ -13,7 +13,7 @@ interface Player {
   tests: number;
 }
 
-type KitKey = "overall" | "vanilla" | "sword" | "axe" | "nethpot" | "pot" | "uhc" | "mace" | "smp";
+type KitKey = "overall" | "ltm" | "vanilla" | "sword" | "axe" | "nethpot" | "pot" | "uhc" | "smp" | "mace";
 type PageType = "home" | "rankings";
 
 // Upstash Redis bağlantı bilgileri
@@ -21,44 +21,49 @@ const UPSTASH_URL = "https://relieved-sailfish-134968.upstash.io";
 const UPSTASH_TOKEN = "gQAAAAAAA8A4AAIgcDEyYTEzOGNmZWmMzkOMjBhYTIZZTk3NmIyOGU0MGMLZAA";
 
 const KITS: Record<string, { ad: string; icon: JSX.Element; color: string }> = {
+  ltm:     { 
+    ad: "LTMs", 
+    icon: <img src="https://mctiers.com/icons/ltm.png" width="30" height="30" alt="LTMs" className="w-7 h-7" />, 
+    color: "#a855f7" 
+  },
   vanilla: { 
     ad: "Vanilla", 
-    icon: <img src="/tier_icons/vanilla.svg" width="30" height="30" alt="Vanilla" className="w-7 h-7" />, 
+    icon: <img src="https://mctiers.com/icons/vanilla.png" width="30" height="30" alt="Vanilla" className="w-7 h-7" />, 
     color: "#fbbf24" 
   },
   sword:   { 
     ad: "Sword", 
-    icon: <img src="/tier_icons/sword.svg" width="30" height="30" alt="Sword" className="w-7 h-7" />, 
+    icon: <img src="https://mctiers.com/icons/sword.png" width="30" height="30" alt="Sword" className="w-7 h-7" />, 
     color: "#60a5fa" 
   },
   axe:     { 
     ad: "Axe", 
-    icon: <img src="/tier_icons/axe.svg" width="30" height="30" alt="Axe" className="w-7 h-7" />, 
+    icon: <img src="https://mctiers.com/icons/axe.png" width="30" height="30" alt="Axe" className="w-7 h-7" />, 
     color: "#a78bfa" 
   },
   nethpot: { 
     ad: "NethOP", 
-    icon: <img src="/tier_icons/nethop.svg" width="30" height="30" alt="NethOP" className="w-7 h-7" />, 
+    icon: <img src="https://mctiers.com/icons/nethop.png" width="30" height="30" alt="NethOP" className="w-7 h-7" />, 
     color: "#ec4899" 
   },
   pot:     { 
     ad: "Pot", 
-    icon: <img src="/tier_icons/pot.svg" width="30" height="30" alt="Pot" className="w-7 h-7" />, 
+    icon: <img src="https://mctiers.com/icons/pot.png" width="30" height="30" alt="Pot" className="w-7 h-7" />, 
     color: "#f43f5e" 
   },
   uhc:     { 
     ad: "UHC", 
-    icon: <img src="/tier_icons/uhc.svg" width="30" height="30" alt="UHC" className="w-7 h-7" />, 
+    icon: <img src="https://mctiers.com/icons/uhc.png" width="30" height="30" alt="UHC" className="w-7 h-7" />, 
     color: "#ef4444" 
   },
   smp:     { 
     ad: "SMP", 
-    icon: <img src="/tier_icons/smp.svg" width="30" height="30" alt="SMP" className="w-7 h-7" />, 
+    icon: <img src="https://mctiers.com/icons/smp.png" width="30" height="30" alt="SMP" className="w-7 h-7" />, 
     color: "#22c55e" 
   },
   mace:    { 
     ad: "Mace", 
-    icon: <img src="/tier_icons/mace.svg" width="30" height="30" alt="Mace" className="w-7 h-7" />, 
+    icon: <img src="https://mctiers.com/icons/mace.png" width="30" height="30" alt="Mace" className="w-7 h-7" />, 
     color: "#eab308" 
   },
 };
@@ -81,7 +86,7 @@ const TIER_COLORS: Record<string, string> = {
   LT5: "from-gray-500 to-gray-700",
 };
 
-const KIT_ORDER: KitKey[] = ["overall", "vanilla", "sword", "axe", "nethpot", "pot", "uhc", "mace", "smp"];
+const KIT_ORDER: KitKey[] = ["overall", "ltm", "vanilla", "sword", "axe", "nethpot", "pot", "uhc", "smp", "mace"];
 
 const getTitle = (points: number): string => {
   if (points >= 300) return "Combat Master";
@@ -107,7 +112,7 @@ export default function App() {
   
   const [stats, setStats] = useState({
     totalPlayers: 0,
-    activeKits: 8,
+    activeKits: 9,
     tierLevels: 10,
     onlineStatus: "ON"
   });
@@ -137,7 +142,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Oyuncuların toplam puanlarını hesapla (Redis'te zaten hesaplanmış ama güvenlik için)
+  // Oyuncuların toplam puanlarını hesapla
   useEffect(() => {
     const updatedPlayers = players.map(player => {
       let total = 0;
@@ -148,9 +153,7 @@ export default function App() {
     });
     updatedPlayers.sort((a, b) => b.totalPoints - a.totalPoints);
     updatedPlayers.forEach((p, idx) => { p.rank = idx + 1; });
-    if (JSON.stringify(updatedPlayers) !== JSON.stringify(players)) {
-      setPlayers(updatedPlayers);
-    }
+    setPlayers(updatedPlayers);
     setStats(prev => ({ ...prev, totalPlayers: updatedPlayers.length }));
   }, [players]);
 
@@ -191,13 +194,11 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0a0e14] text-white">
-      {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px]" />
       </div>
 
-      {/* ============ HEADER ============ */}
       <header className="relative z-50 sticky top-0 backdrop-blur-xl bg-[#0f141b]/80 border-b border-white/5">
         <div className="max-w-[1400px] mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
@@ -234,7 +235,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* ============ ANIMASYONLU SAYFA GEÇİŞİ ============ */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentPage}
@@ -246,7 +246,6 @@ export default function App() {
         >
           {currentPage === "home" && (
             <main className="relative z-10 max-w-[1400px] mx-auto px-4 py-12">
-              {/* Hero Section */}
               <div className="text-center mb-16">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full text-cyan-400 text-sm font-semibold mb-6">
                   <span className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></span>
@@ -264,7 +263,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
                 {[
                   { label: "Toplam Oyuncu", value: stats.totalPlayers || "0", icon: "👥", color: "from-cyan-500 to-blue-600" },
@@ -280,24 +278,16 @@ export default function App() {
                 ))}
               </div>
 
-              {/* Kit Showcase */}
-              <div className="mb-16">
-                <div className="text-center mb-10">
-                  <h2 className="text-3xl md:text-4xl font-black mb-3">Test Edebileceğin Kitler</h2>
-                  <p className="text-white/60">8 farklı kit, kendi tarzını bul!</p>
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {Object.entries(KITS).map(([key, kit], i) => (
-                    <motion.div key={key} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }} className="bg-[#11161f] border border-white/5 rounded-2xl p-6 hover:border-cyan-500/30 hover:bg-[#151b26] transition-all cursor-pointer group" onClick={() => { setCurrentPage("rankings"); setSelectedKit(key as KitKey); }}>
-                      <div className="mb-3 group-hover:scale-110 transition-transform flex justify-center">{kit.icon}</div>
-                      <h3 className="text-lg font-bold mb-1 text-center">{kit.ad}</h3>
-                      <p className="text-xs text-white/40 text-center">Tier sistemiyle test edilebilir</p>
-                    </motion.div>
-                  ))}
-                </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+                {Object.entries(KITS).map(([key, kit], i) => (
+                  <motion.div key={key} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }} className="bg-[#11161f] border border-white/5 rounded-2xl p-6 hover:border-cyan-500/30 hover:bg-[#151b26] transition-all cursor-pointer group" onClick={() => { setCurrentPage("rankings"); setSelectedKit(key as KitKey); }}>
+                    <div className="mb-3 group-hover:scale-110 transition-transform flex justify-center">{kit.icon}</div>
+                    <h3 className="text-lg font-bold mb-1 text-center">{kit.ad}</h3>
+                    <p className="text-xs text-white/40 text-center">Tier sistemiyle test edilebilir</p>
+                  </motion.div>
+                ))}
               </div>
 
-              {/* Features Section */}
               <div className="mb-16">
                 <div className="text-center mb-10">
                   <h2 className="text-3xl md:text-4xl font-black mb-3">Neden Abyssal Ocean?</h2>
@@ -320,7 +310,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* CTA Section */}
               <div className="relative bg-gradient-to-br from-cyan-600/20 via-blue-600/20 to-purple-600/20 border border-white/10 rounded-3xl p-8 md:p-12 text-center overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/20 rounded-full blur-[100px]" />
                 <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/20 rounded-full blur-[100px]" />
@@ -331,7 +320,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Footer */}
               <div className="mt-16 pt-8 border-t border-white/5 text-center text-white/40 text-sm">
                 <p>© 2025 Abyssal Ocean Tier List. Tüm hakları saklıdır.</p>
               </div>
@@ -340,7 +328,6 @@ export default function App() {
 
           {currentPage === "rankings" && (
             <main className="relative z-10 max-w-[1400px] mx-auto px-4 py-6">
-              {/* Animasyonlu Kit Butonları */}
               <div className="mb-6 overflow-x-auto scrollbar-hide">
                 <div className="flex items-center gap-2 min-w-max pb-2">
                   {KIT_ORDER.map((key, index) => {
@@ -511,7 +498,6 @@ export default function App() {
         </motion.div>
       </AnimatePresence>
 
-      {/* ============ PLAYER MODAL ============ */}
       {selectedPlayer && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md" onClick={() => setSelectedPlayer(null)}>
           <div className="relative w-full max-w-2xl bg-[#11161f] rounded-[28px] border border-white/10 shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
