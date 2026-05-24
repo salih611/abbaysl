@@ -1,1 +1,51 @@
-@import "tailwindcss";
+if (i.commandName === 'test-sonuc') {
+    const yetkiliMi = i.member.roles.cache.some(role => YETKILI_TESTER_ROLLER.includes(role.id));
+    if (!yetkiliMi) return i.reply({ content: '❌ Bu komutu sadece yetkili testerlar kullanabilir!', ephemeral: true });
+    
+    const yeniRol = i.options.getRole('yeni_tier_rol');
+    if (!VERILEBILECEK_ROLLER.includes(yeniRol.id)) return i.reply({ content: '❌ Bu rolü verme yetkiniz yok!', ephemeral: true });
+    
+    await i.deferReply({ ephemeral: true });
+    
+    const oyuncu = i.options.getMember('oyuncu');
+    const sistem = i.options.getString('sistem');
+    const testerUser = i.options.getUser('tester');
+    const kitDetay = i.options.getString('kit_detay');
+    const minecraftNick = i.options.getString('oyun_ici_isim') || oyuncu.user.username; // 🔥 YENİ: Minecraft nick'i al
+
+    incrementTestCount(testerUser.id, sistem);
+
+    const kitData = KITS[sistem];
+    if (kitData) {
+        const kitAdi = kitData.ad;
+        for (const rolId of VERILEBILECEK_ROLLER) {
+            const rol = i.guild.roles.cache.get(rolId);
+            if (rol && oyuncu.roles.cache.has(rol.id) && rol.name.includes(kitAdi)) {
+                try { await oyuncu.roles.remove(rol); } catch(err) { console.log("Eski rol kaldırılamadı:", err); }
+                break;
+            }
+        }
+    }
+    
+    try { await oyuncu.roles.add(yeniRol); } catch(err) { 
+        return i.editReply({ content: `❌ Rol verilemedi!` }); 
+    }
+
+    const embed = new EmbedBuilder().setColor(0x2b2d31).setThumbnail(oyuncu.user.displayAvatarURL({ dynamic: true })).setTitle('PVP Academy')
+        .addFields(
+            { name: '🥊 Kit:', value: `\`${kitDetay.toUpperCase()}\``, inline: false },
+            { name: '🔍 Oyuncu:', value: `<@${oyuncu.id}>`, inline: true },
+            { name: '🕹️ Adı:', value: `\`${oyuncu.user.username}\``, inline: true },
+            { name: '🧪 Sonuç:', value: `\`${i.options.getString('sonuc')}\``, inline: false },
+            { name: '📉 Eski Tier:', value: `\`${i.options.getString('eski_tier')}\``, inline: true },
+            { name: '📈 Yeni Tier:', value: `${yeniRol}`, inline: true },
+            { name: '🥷 Tester:', value: `<@${testerUser.id}>`, inline: false }
+        ).setTimestamp();
+    await client.channels.cache.get(SONUC_KANAL).send({ embeds: [embed] });
+    
+    // 🔥 DÜZELTİLMİŞ: Minecraft nick'ini doğru gönder
+    await redisKaydet(oyuncu, sistem, yeniRol.name, minecraftNick);
+    
+    await i.editReply(`✅ Sonuç gönderildi! ${yeniRol} rolü verildi. Veritabanına kaydedildi ve site otomatik güncelleniyor.`);
+    return;
+}
