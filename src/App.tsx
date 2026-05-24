@@ -16,52 +16,56 @@ interface Player {
 type KitKey = "overall" | "vanilla" | "sword" | "axe" | "nethpot" | "pot" | "uhc" | "mace" | "smp";
 type PageType = "home" | "rankings";
 
+// Upstash Redis bağlantı bilgileri
+const UPSTASH_URL = "https://relieved-sailfish-134968.upstash.io";
+const UPSTASH_TOKEN = "gQAAAAAAA8A4AAIgcDEyYTEzOGNmZWmMzkOMjBhYTIZZTk3NmIyOGU0MGMLZAA";
+
 const KITS: Record<string, { ad: string; icon: JSX.Element; color: string }> = {
   vanilla: { 
     ad: "Vanilla", 
-    icon: <img src="https://www.tierslist.net/tier_icons/vanilla.svg" width="30" height="30" alt="Vanilla" className="w-7 h-7" />, 
+    icon: <img src="/tier_icons/vanilla.svg" width="30" height="30" alt="Vanilla" className="w-7 h-7" />, 
     color: "#fbbf24" 
   },
   sword:   { 
     ad: "Sword", 
-    icon: <img src="https://www.tierslist.net/tier_icons/sword.svg" width="30" height="30" alt="Sword" className="w-7 h-7" />, 
+    icon: <img src="/tier_icons/sword.svg" width="30" height="30" alt="Sword" className="w-7 h-7" />, 
     color: "#60a5fa" 
   },
   axe:     { 
     ad: "Axe", 
-    icon: <img src="https://www.tierslist.net/tier_icons/axe.svg" width="30" height="30" alt="Axe" className="w-7 h-7" />, 
+    icon: <img src="/tier_icons/axe.svg" width="30" height="30" alt="Axe" className="w-7 h-7" />, 
     color: "#a78bfa" 
   },
   nethpot: { 
     ad: "NethOP", 
-    icon: <img src="https://www.tierslist.net/tier_icons/nethop.svg" width="30" height="30" alt="NethOP" className="w-7 h-7" />, 
+    icon: <img src="/tier_icons/nethop.svg" width="30" height="30" alt="NethOP" className="w-7 h-7" />, 
     color: "#ec4899" 
   },
   pot:     { 
     ad: "Pot", 
-    icon: <img src="https://www.tierslist.net/tier_icons/pot.svg" width="30" height="30" alt="Pot" className="w-7 h-7" />, 
+    icon: <img src="/tier_icons/pot.svg" width="30" height="30" alt="Pot" className="w-7 h-7" />, 
     color: "#f43f5e" 
   },
   uhc:     { 
     ad: "UHC", 
-    icon: <img src="https://www.tierslist.net/tier_icons/uhc.svg" width="30" height="30" alt="UHC" className="w-7 h-7" />, 
+    icon: <img src="/tier_icons/uhc.svg" width="30" height="30" alt="UHC" className="w-7 h-7" />, 
     color: "#ef4444" 
   },
   smp:     { 
     ad: "SMP", 
-    icon: <img src="https://www.tierslist.net/tier_icons/smp.svg" width="30" height="30" alt="SMP" className="w-7 h-7" />, 
+    icon: <img src="/tier_icons/smp.svg" width="30" height="30" alt="SMP" className="w-7 h-7" />, 
     color: "#22c55e" 
   },
   mace:    { 
     ad: "Mace", 
-    icon: <img src="https://www.tierslist.net/tier_icons/mace.svg" width="30" height="30" alt="Mace" className="w-7 h-7" />, 
+    icon: <img src="/tier_icons/mace.svg" width="30" height="30" alt="Mace" className="w-7 h-7" />, 
     color: "#eab308" 
   },
 };
 
 const TIER_POINTS: Record<string, number> = {
-  HT1: 100, HT2: 80, HT3: 60, HT4: 40, HT5: 20,
-  LT1: 15,  LT2: 12, LT3: 9,  LT4: 6,  LT5: 3,
+  HT1: 100, HT2: 85, HT3: 70, HT4: 60, HT5: 50,
+  LT1: 40,  LT2: 30, LT3: 20, LT4: 10, LT5: 5,
 };
 
 const TIER_COLORS: Record<string, string> = {
@@ -108,60 +112,46 @@ export default function App() {
     onlineStatus: "ON"
   });
 
-  // Discord test sonuçlarını localStorage'dan oku (bot'un yazdığı yer)
+  // Redis'ten oyuncu verilerini yükle
   useEffect(() => {
-    const checkUpdates = () => {
-      const updates = localStorage.getItem("abyssal_updates");
-      if (updates) {
-        try {
-          const data = JSON.parse(updates);
-          setPlayers(prev => {
-            const idx = prev.findIndex(p => p.discordId === data.discordId);
-            if (idx >= 0) {
-              const updated = [...prev];
-              updated[idx] = { ...updated[idx], tiers: { ...updated[idx].tiers, [data.kit]: data.tier } };
-              return updated.sort((a, b) => b.totalPoints - a.totalPoints).map((p, i) => ({ ...p, rank: i + 1 }));
-            }
-            return prev;
-          });
-          localStorage.removeItem("abyssal_updates");
-        } catch {}
-      }
-    };
-    const interval = setInterval(checkUpdates, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Bot'un web_oyuncular.json dosyasını da oku (yedek mekanizma)
-  useEffect(() => {
-    const loadFromJson = async () => {
+    const loadPlayers = async () => {
       try {
-        const res = await fetch('/web_oyuncular.json');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.length > 0) {
-            setPlayers(data);
+        const response = await fetch(`${UPSTASH_URL}/get/players`, {
+          headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.result) {
+            const playersData = JSON.parse(data.result);
+            setPlayers(playersData);
+            setStats(prev => ({ ...prev, totalPlayers: playersData.length }));
           }
         }
-      } catch (e) {
-        console.log("JSON okunamadı");
+      } catch (error) {
+        console.log("Redis'den yüklenemedi:", error);
       }
     };
-    loadFromJson();
-    const interval = setInterval(loadFromJson, 30000);
+    
+    loadPlayers();
+    const interval = setInterval(loadPlayers, 30000);
     return () => clearInterval(interval);
   }, []);
 
+  // Oyuncuların toplam puanlarını hesapla (Redis'te zaten hesaplanmış ama güvenlik için)
   useEffect(() => {
-    const fetchStats = () => {
-      setStats({
-        totalPlayers: players.length,
-        activeKits: 8,
-        tierLevels: 10,
-        onlineStatus: "ON"
-      });
-    };
-    fetchStats();
+    const updatedPlayers = players.map(player => {
+      let total = 0;
+      for (const tier of Object.values(player.tiers)) {
+        total += TIER_POINTS[tier] || 0;
+      }
+      return { ...player, totalPoints: total };
+    });
+    updatedPlayers.sort((a, b) => b.totalPoints - a.totalPoints);
+    updatedPlayers.forEach((p, idx) => { p.rank = idx + 1; });
+    if (JSON.stringify(updatedPlayers) !== JSON.stringify(players)) {
+      setPlayers(updatedPlayers);
+    }
+    setStats(prev => ({ ...prev, totalPlayers: updatedPlayers.length }));
   }, [players]);
 
   const filteredPlayers = useMemo(() => {
@@ -350,7 +340,7 @@ export default function App() {
 
           {currentPage === "rankings" && (
             <main className="relative z-10 max-w-[1400px] mx-auto px-4 py-6">
-              {/* Animasyonlu Kit Butonları - HER BİR KİT AYRI AYRI ANİMASYONLU */}
+              {/* Animasyonlu Kit Butonları */}
               <div className="mb-6 overflow-x-auto scrollbar-hide">
                 <div className="flex items-center gap-2 min-w-max pb-2">
                   {KIT_ORDER.map((key, index) => {
@@ -360,25 +350,20 @@ export default function App() {
                     return (
                       <motion.button
                         key={key}
-                        custom={index}
-                        initial={{ opacity: 0, y: -20 }}
+                        initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05, duration: 0.3, type: "spring", stiffness: 300 }}
+                        transition={{ delay: index * 0.03 }}
                         onClick={() => setSelectedKit(key)}
                         className={`relative px-5 py-3 rounded-2xl font-medium transition-all whitespace-nowrap flex items-center gap-2.5 ${
                           isActive ? "bg-white text-black shadow-lg" : "bg-[#1a1f2e] text-white/60 hover:bg-[#222838] hover:text-white"
                         }`}
-                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
                         <div className="w-7 h-7 flex items-center justify-center">{kit.icon}</div>
                         <span className="text-sm font-semibold">{kit.ad}</span>
                         {isActive && (
-                          <motion.div
-                            layoutId="activeTab"
-                            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-1 bg-white rounded-full"
-                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                          />
+                          <motion.div layoutId="activeTab" className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-1 bg-white rounded-full" />
                         )}
                       </motion.button>
                     );
